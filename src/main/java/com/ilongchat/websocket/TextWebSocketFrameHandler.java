@@ -1,7 +1,5 @@
 package com.ilongchat.websocket;
 
-import java.util.Date;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -10,6 +8,8 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.AttributeKey;
+
+import com.ilongchat.util.GsonUtils;
 
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>{
 
@@ -76,8 +76,12 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
 		@Override
 		protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-			group.writeAndFlush(msg.retain());
 			
+			System.out.println(msg.text());
+			RedPackageInfo redPackageInfo = GsonUtils.GsonToBean(msg.text(), RedPackageInfo.class);
+			System.out.println(redPackageInfo);
+			TextWebSocketFrame resMsg = new TextWebSocketFrame(redPackageInfo.getDetail());
+			group.writeAndFlush(resMsg);
 		}
 
 }
