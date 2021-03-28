@@ -22,7 +22,7 @@ public class ChatServerInitializer extends ChannelInitializer<Channel>  {
 		.addLast(new HttpObjectAggregator(64*1024))
 		.addLast(new HttpRequestHandler("/ws"))
 		.addLast(new WebSocketServerProtocolHandler("/ws"))
-		.addLast(new TextWebSocketFrameHandler(group));
+		.addLast(new TextWebSocketFrameHandler());
 	}
 	
 
