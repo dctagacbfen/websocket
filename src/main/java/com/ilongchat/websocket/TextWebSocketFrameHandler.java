@@ -4,20 +4,15 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.AttributeKey;
 
-import com.ilongchat.util.GsonUtils;
-
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>{
 
-	 private final ChannelGroup group;
 	 
-	    public TextWebSocketFrameHandler(ChannelGroup group) {
+	    public TextWebSocketFrameHandler() {
 	        super();
-	        this.group = group;
 	    }
 	 
 	    @Override
@@ -25,7 +20,6 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 	        if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
 	            ctx.pipeline().remove(HttpRequestHandler.class);
 	            // group.writeAndFlush("");
-	            group.add(ctx.channel());
 	        } else {
 	            super.userEventTriggered(ctx, evt);
 	        }
@@ -56,8 +50,8 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 			// TODO Auto-generated method stub
-			super.channelRead(ctx, msg);
 			System.out.println("......channelRead");
+			super.channelRead(ctx, msg);
 		}
 
 		@Override
@@ -76,12 +70,8 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
 		@Override
 		protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+			ctx.write(msg.retain());
 			
-			System.out.println(msg.text());
-			RedPackageInfo redPackageInfo = GsonUtils.GsonToBean(msg.text(), RedPackageInfo.class);
-			System.out.println(redPackageInfo);
-			TextWebSocketFrame resMsg = new TextWebSocketFrame(redPackageInfo.getDetail());
-			group.writeAndFlush(resMsg);
 		}
 
 }
