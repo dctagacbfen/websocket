@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.ilongchat.service.IProducer;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -32,12 +30,10 @@ public class WebsocketServer {
 	
 
 	private Channel channel;
-
-	@Autowired
-	private IProducer producer;
+	
 	public ChannelFuture start(InetSocketAddress adress) throws InterruptedException{
 		ServerBootstrap bootStrap = new ServerBootstrap();
-		bootStrap.group(workGroup).channel(NioServerSocketChannel.class).childHandler(new ChatServerInitializer(bossGroup));
+		bootStrap.group(workGroup).channel(NioServerSocketChannel.class).childHandler(new ChatServerInitializer());
 		ChannelFuture futrue = bootStrap.bind(adress).sync();
 		channel = futrue.channel();
 		return futrue;
@@ -54,10 +50,7 @@ public class WebsocketServer {
 	@PostConstruct
 	public void startServer() throws InterruptedException {
 		log.info("netty服务器启动。。。。");
-		final WebsocketServer server = new WebsocketServer();
-		server.start(new InetSocketAddress(8999));
+		start(new InetSocketAddress(8999));
 		log.info("netty服务器启动完毕。。。。");
-		producer.sendMessage("启动....");
-		
 	}
 }
