@@ -1,26 +1,34 @@
 package com.ilongchat.websocket;
 
-import com.ilongchat.handler.MessageDispatcher;
-import com.ilongchat.modal.InMessage;
-import com.ilongchat.util.GsonUtils;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.AttributeKey;
 
+import com.ilongchat.util.GsonUtils;
+
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>{
+
+	 private final ChannelGroup group;
 	 
-	    public TextWebSocketFrameHandler() {
+	    public TextWebSocketFrameHandler(ChannelGroup group) {
 	        super();
+	        this.group = group;
 	    }
 	 
 	    @Override
 	    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-	      
+	        if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
+	            ctx.pipeline().remove(HttpRequestHandler.class);
+	            // group.writeAndFlush("");
+	            group.add(ctx.channel());
+	        } else {
 	            super.userEventTriggered(ctx, evt);
+	        }
 	    }
 	
 	 
@@ -36,7 +44,6 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 	        Channel incoming = ctx.channel();
 	        String userId = (String) incoming.attr(AttributeKey.valueOf(incoming.id().asShortText())).get();
 	        Session.removeAttribute(userId);// 删除缓存的通道
-	        super.channelInactive(ctx);
 	    }
 
 		@Override
@@ -49,8 +56,8 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 			// TODO Auto-generated method stub
-			System.out.println("......channelRead");
 			super.channelRead(ctx, msg);
+			System.out.println("......channelRead");
 		}
 
 		@Override
@@ -68,13 +75,13 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 		}
 
 		@Override
-		protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception {
-			//ctx.write(msg.retain());
+		protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
 			
-			String msgStr = frame.text();
-			InMessage msg = GsonUtils.GsonToBean(msgStr, InMessage.class);
-			MessageDispatcher.dispatch(ctx.channel(), msg);
-			
+			System.out.println(msg.text());
+			RedPackageInfo redPackageInfo = GsonUtils.GsonToBean(msg.text(), RedPackageInfo.class);
+			System.out.println(redPackageInfo);
+			TextWebSocketFrame resMsg = new TextWebSocketFrame(redPackageInfo.getDetail());
+			group.writeAndFlush(resMsg);
 		}
 
 }
