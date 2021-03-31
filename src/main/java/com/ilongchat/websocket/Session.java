@@ -19,9 +19,6 @@ public class Session {
 	public static void setAttribute(String userId,Channel channel){
 		userInfo.put(userId, channel);
 	}
-	public static Channel getAttriube(String userId){
-		return userInfo.get(userId);
-	}
 	public static void removeAttribute(String userId){
 		userInfo.remove(userId);
 	}
