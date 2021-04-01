@@ -28,9 +28,9 @@ public class SendMessageHandler implements IHandler {
 		AttributeKey<User> userKey = AttributeKey.valueOf(Constant.SESSION_USER);
 		User user = channel.attr(userKey).get();
 		Map<String,Object> data = message.getData();
-		//data.put("uid", user.getUserId());
+		data.put("uid", user.getUserId());
 		producer.sendMessage(GsonUtils.GsonString(message));
-		channel.writeAndFlush(GsonUtils.GsonString(message));
+		//channel.writeAndFlush(GsonUtils.GsonString(message));
 	}
 
 }

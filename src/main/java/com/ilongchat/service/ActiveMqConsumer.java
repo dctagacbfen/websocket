@@ -1,6 +1,7 @@
 package com.ilongchat.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,11 @@ public class ActiveMqConsumer implements IConsumer{
 		Map<String,Object> data = inMessage.getData();
 		String uid = (String)data.get("uid");
 		Channel channel = Session.getAttriube(uid);
-		if(channel!=null){
-			channel.writeAndFlush(message);
-		}else{
-			log.info("用户不在线消费消息失败！");
-		}
+			if(channel!=null){
+				channel.writeAndFlush(message);
+			}else{
+				log.info("用户不在线消费消息失败！");
+			}
 		System.out.println("activeMq 收到消息{}"+message);
 	}
 }
