@@ -1,7 +1,6 @@
 package com.ilongchat.service;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import com.ilongchat.util.GsonUtils;
 import com.ilongchat.websocket.Session;
 
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 @Service
 public class ActiveMqConsumer implements IConsumer{
 	private static final Logger log = LoggerFactory.getLogger(ActiveMqConsumer.class);
@@ -25,11 +25,11 @@ public class ActiveMqConsumer implements IConsumer{
 		Map<String,Object> data = inMessage.getData();
 		String uid = (String)data.get("uid");
 		Channel channel = Session.getAttriube(uid);
-			if(channel!=null){
-				channel.writeAndFlush(message);
-			}else{
-				log.info("用户不在线消费消息失败！");
-			}
+		if(channel!=null){
+			channel.writeAndFlush(new TextWebSocketFrame(message));
+		}else{
+			log.info("用户不在线消费消息失败！");
+		}
 		System.out.println("activeMq 收到消息{}"+message);
 	}
 }

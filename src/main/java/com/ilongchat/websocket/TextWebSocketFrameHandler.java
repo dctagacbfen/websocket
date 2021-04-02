@@ -9,11 +9,12 @@ import com.ilongchat.modal.InMessage;
 import com.ilongchat.modal.User;
 import com.ilongchat.util.GsonUtils;
 
-import io.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
@@ -26,8 +27,13 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 	 
 	    @Override
 	    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-	      
-	            super.userEventTriggered(ctx, evt);
+	    		
+	    	   if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
+		            ctx.pipeline().remove(HttpRequestHandler.class);
+		            // group.writeAndFlush("");
+		        } else {
+		            super.userEventTriggered(ctx, evt);
+		        }
 	    }
 	
 	 
@@ -77,18 +83,10 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
 		@Override
 		protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception {
-			//ctx.write(msg.retain());
-			
 			String msgStr = frame.text();
 			log.debug("netty收到客户端消息："+msgStr);
-			InMessage msg = GsonUtils.GsonToBean(msgStr, InMessage.class);	
-			AttributeKey<User> userKey = AttributeKey.valueOf(Constant.SESSION_USER);
-			Attribute<User> attr = ctx.attr(userKey);
-			User user = new User();
-			user.setUserId(msg.getData().get("uid").toString());
-			attr.setIfAbsent(user);
+			InMessage msg = GsonUtils.GsonToBean(msgStr, InMessage.class);
 			MessageDispatcher.dispatch(ctx.channel(), msg);
-			
 		}
 
 }
