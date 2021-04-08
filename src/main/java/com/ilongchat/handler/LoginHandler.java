@@ -14,7 +14,7 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
 public class LoginHandler implements IHandler{
-	private static final Logger log = LoggerFactory.getLogger(SendMessageHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(SendPointHandler.class);
 
 	@Override
 	public void handlerMessage(Channel channel,InMessage message) {

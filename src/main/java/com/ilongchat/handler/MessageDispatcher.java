@@ -18,7 +18,8 @@ public class MessageDispatcher{
 	
 	static{
 		handlerMap.put(MessageType.LOGIN, new LoginHandler());
-		handlerMap.put(MessageType.MESSAGE, new SendMessageHandler());
+		handlerMap.put(MessageType.POINT, new SendPointHandler());
+		handlerMap.put(MessageType.MSG, new SendMsgHandler());
 	}
 	public static void dispatch(Channel channel,InMessage message){
 		IHandler handler = handlerMap.get(message.getType());
